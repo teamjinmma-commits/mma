@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Membership Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    font-size: 80px;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body id="status">
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const email = urlParams.get('email'); // QR passes ?email=student@example.com
+const statusEl = document.getElementById('status');
+
+// Replace this URL with your published CSV URL from Google Sheets
+const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBPISKcJtGVtp4SPRuH3KBX31mJDK1Yvdo6Vr8CCawTwZ6Cn06u1-b6f_4_1fKFhbMZhcILAE5H3PQ/pub?gid=0&single=true&output=csv
+';
+
+fetch(csvUrl)
+  .then(response => response.text())
+  .then(data => {
+    const rows = data.split('\n').slice(1); // skip header
+    let found = false;
+    rows.forEach(row => {
+      const cols = row.split(',');
+      if (cols[0].trim().toLowerCase() === email.toLowerCase()) {
+        const status = cols[3].trim(); // Membership Status column
+        statusEl.textContent = status;
+        statusEl.style.backgroundColor = (status === "Active") ? "green" : "red";
+        found = true;
+      }
+    });
+    if (!found) {
+      statusEl.textContent = "NOT REGISTERED";
+      statusEl.style.backgroundColor = "red";
+    }
+  })
+  .catch(err => {
+    statusEl.textContent = "ERROR LOADING SHEET";
+    statusEl.style.backgroundColor = "red";
+  });
+</script>
+</body>
+</html>
